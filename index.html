@@ -139,6 +139,7 @@
       font-size: 0.88rem;
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
     }
     .btn:active {
       transform: scale(0.98);
@@ -153,7 +154,7 @@
       background: #0ea1a7;
     }
     .btn-sm {
-      padding: 4px 8px;
+      padding: 5px 10px;
       font-size: 0.78rem;
     }
     .btn-danger {
@@ -165,9 +166,10 @@
       background: #fbd5d5;
     }
     
-    /* 테이블 */
+    /* 테이블 (가로 스크롤 및 텍스트 줄바꿈 방지) */
     .table-responsive {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       margin-top: 10px;
     }
     table {
@@ -180,22 +182,41 @@
       padding: 12px 14px;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
+      white-space: nowrap; /* 모든 셀 줄바꿈 방지 */
     }
     th {
       background-color: var(--palette-sand-light);
       color: var(--palette-green);
       font-weight: 700;
+    }
+    
+    /* 지역 배지 한줄 고정 */
+    .region-tag {
+      display: inline-block;
+      white-space: nowrap;
+      background: #eaf5f0;
+      color: #216343;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      border: 1px solid #c9e6d8;
+    }
+
+    /* 숙소명 + 링크 아이콘 한줄 고정 */
+    .acc-name-cell {
       white-space: nowrap;
     }
-    td a {
+    .acc-name-cell a {
       color: #0d8b90;
       text-decoration: none;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
+      white-space: nowrap;
     }
-    td a:hover {
+    .acc-name-cell a:hover {
       text-decoration: underline;
     }
     .price-tag {
@@ -213,6 +234,7 @@
       padding: 2px 6px;
       gap: 4px;
       border: 1px solid var(--border);
+      white-space: nowrap;
     }
     .vote-btn {
       background: white;
@@ -442,7 +464,7 @@
       renderMemos();
     }
 
-    // 숙소 렌더링
+    // 숙소 렌더링 (모든 항목 한 줄 고정)
     function renderAccommodations() {
       const tbody = document.getElementById('accommodationTableBody');
       tbody.innerHTML = '';
@@ -457,10 +479,10 @@
           : `<strong>${item.name}</strong>`;
         
         tr.innerHTML = `
-          <td><span style="background:#eaf5f0; color:#216343; padding:3px 9px; border-radius:6px; font-weight:700; font-size:0.82rem; border:1px solid #c9e6d8;">${item.region}</span></td>
-          <td>${linkDisplay}</td>
+          <td><span class="region-tag">${item.region}</span></td>
+          <td class="acc-name-cell">${linkDisplay}</td>
           <td class="price-tag">${Number(item.price).toLocaleString()}원</td>
-          <td style="color:var(--text-muted); font-size:0.86rem;">${item.memo}</td>
+          <td style="color:var(--text-muted); font-size:0.86rem; white-space:nowrap;">${item.memo}</td>
           <td>
             <div class="vote-control">
               <button class="vote-btn" onclick="changeVote(${item.id}, -1)" title="투표 감소">-</button>
