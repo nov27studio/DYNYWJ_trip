@@ -514,7 +514,7 @@
     try {
       firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
-      docRef = db.collection("trips").doc("family_trip_data");
+      docRef = db.collection("trips").doc("family_trip_final");
       isFirebaseReady = true;
 
       docRef.onSnapshot((doc) => {
