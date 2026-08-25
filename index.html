@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>도나윤이네 우진이네 여행플래너</title>
+  
+  <!-- Firebase SDK (v9 호환 모드) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
   <style>
     :root {
       --palette-sand-light: #f7f4ee;
@@ -166,7 +171,7 @@
       background: #fbd5d5;
     }
     
-    /* 테이블 (가로 스크롤 및 텍스트 줄바꿈 방지) */
+    /* 테이블 (1줄 고정 & 모바일 스크롤) */
     .table-responsive {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -182,15 +187,13 @@
       padding: 12px 14px;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
-      white-space: nowrap; /* 모든 셀 줄바꿈 방지 */
+      white-space: nowrap;
     }
     th {
       background-color: var(--palette-sand-light);
       color: var(--palette-green);
       font-weight: 700;
     }
-    
-    /* 지역 배지 한줄 고정 */
     .region-tag {
       display: inline-block;
       white-space: nowrap;
@@ -202,8 +205,6 @@
       font-size: 0.82rem;
       border: 1px solid #c9e6d8;
     }
-
-    /* 숙소명 + 링크 아이콘 한줄 고정 */
     .acc-name-cell {
       white-space: nowrap;
     }
@@ -310,6 +311,22 @@
       color: var(--palette-green);
       box-shadow: 0 2px 8px rgba(45, 130, 89, 0.05);
     }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+    }
+    .dot-connecting {
+      background: #f59e0b;
+    }
   </style>
 </head>
 <body>
@@ -327,31 +344,17 @@
           <stop offset="100%" stop-color="#2d8259" stop-opacity="0.8" />
         </linearGradient>
       </defs>
-
-      <!-- 태양 및 구름 -->
       <circle cx="680" cy="50" r="32" fill="url(#sunGrad)" opacity="0.85" />
       <path d="M120 40 q20 -15 45 0 q25 -20 50 0 q20 15 0 25 h-95 z" fill="#ffffff" opacity="0.4" />
       <path d="M520 65 q15 -10 35 0 q20 -15 40 0 q15 10 0 20 h-75 z" fill="#ffffff" opacity="0.35" />
-
-      <!-- 갈매기 -->
       <path d="M260 45 q10 -8 20 0 q10 -8 20 0" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.6" />
       <path d="M295 55 q7 -6 14 0 q7 -6 14 0" fill="none" stroke="#ffffff" stroke-width="1.8" opacity="0.5" />
-
-      <!-- 바다 파도 레이어 1 -->
       <path d="M0 135 C150 120 280 145 420 130 C560 115 690 140 800 128 L800 240 L0 240 Z" fill="url(#seaGrad)" />
-
-      <!-- 바다 파도 레이어 2 (에메랄드/아쿠아) -->
       <path d="M0 155 C120 140 240 165 390 150 C540 135 670 160 800 148 L800 240 L0 240 Z" fill="#16bcc2" opacity="0.75" />
-
-      <!-- 해변 모래사장 (따뜻한 샌드 탄) -->
       <path d="M0 185 C180 165 340 195 520 175 C680 160 760 180 800 172 L800 240 L0 240 Z" fill="#c5a987" />
       <path d="M0 205 C150 190 320 215 500 198 C660 185 750 205 800 195 L800 240 L0 240 Z" fill="#afad7e" opacity="0.6" />
-
-      <!-- 야자수 섬 실루엣 (좌측) -->
       <path d="M-20 200 Q40 175 100 240 Z" fill="#b2b083" />
-      <!-- 야자수 줄기 -->
       <path d="M35 195 Q48 160 62 135" fill="none" stroke="#216343" stroke-width="5" stroke-linecap="round" />
-      <!-- 야자수 잎 -->
       <path d="M62 135 Q35 125 20 138" fill="none" stroke="#2d8259" stroke-width="3" stroke-linecap="round" />
       <path d="M62 135 Q50 110 35 115" fill="none" stroke="#2d8259" stroke-width="3" stroke-linecap="round" />
       <path d="M62 135 Q75 110 90 118" fill="none" stroke="#2d8259" stroke-width="3" stroke-linecap="round" />
@@ -367,8 +370,10 @@
   <div class="container">
 
     <div class="share-bar">
-      <span>💡 브라우저에 자동 저장되며 모든 항목을 자유롭게 추가·수정할 수 있습니다.</span>
-      <button class="btn btn-sm btn-accent" onclick="exportData()">데이터 내보내기</button>
+      <div id="syncStatus" class="status-badge">
+        <span class="dot"></span> <span>실시간 클라우드 동기화 중</span>
+      </div>
+      <button class="btn btn-sm btn-accent" onclick="exportData()">데이터 백업</button>
     </div>
 
     <!-- 1. 숙소 후보 비교 및 투표 테이블 -->
@@ -400,7 +405,7 @@
             </tr>
           </thead>
           <tbody id="accommodationTableBody">
-            <!-- 동적 렌더링 -->
+            <!-- 실시간 렌더링 -->
           </tbody>
         </table>
       </div>
@@ -434,45 +439,84 @@
   </div>
 
   <script>
-    // 기본 데이터 세팅
-    const defaultAccommodations = [
-      { id: 1, region: "강릉", name: "세인트존스 호텔", link: "https://map.naver.com", price: 180000, memo: "오션뷰 객실, 인피니티 풀", votes: 2 },
-      { id: 2, region: "가평", name: "어반힐스 키즈 풀빌라", link: "https://map.naver.com", price: 320000, memo: "개별 실내 수영장, 바비큐장", votes: 3 }
-    ];
+    // 전달해주신 Firebase 키값 설정
+    const firebaseConfig = {
+      apiKey: "AIzaSyDeAnZDZ-J0aaXF3rj_FGwyNeARGg67iog",
+      authDomain: "test-6e393.firebaseapp.com",
+      projectId: "test-6e393",
+      storageBucket: "test-6e393.firebasestorage.app",
+      messagingSenderId: "1063493439359",
+      appId: "1:1063493439359:web:c3046fcb967e6ace66d44a",
+      measurementId: "G-04Z6B9R83N"
+    };
 
-    const defaultTodos = [
-      { id: 1, text: "아이들 상비약 및 해열제", done: false },
-      { id: 2, text: "물놀이 튜브 & 수영복", done: true },
-      { id: 3, text: "카메라 & 충전 케이블", done: false }
-    ];
+    let isFirebaseReady = false;
+    let db = null;
+    let docRef = null;
 
-    const defaultMemos = [
-      { id: 1, author: "도나윤네", text: "첫날 저녁은 펜션 바비큐장에서 고기 구워먹어요!" },
-      { id: 2, author: "우진이네", text: "가는 길에 유명한 닭갈비 맛집 들렀다 가면 좋을 것 같아요." }
-    ];
+    let appData = {
+      accommodations: [
+        { id: 1, region: "강릉", name: "세인트존스 호텔", link: "https://map.naver.com", price: 180000, memo: "오션뷰 객실, 인피니티 풀", votes: 2 },
+        { id: 2, region: "가평", name: "어반힐스 키즈 풀빌라", link: "https://map.naver.com", price: 320000, memo: "개별 실내 수영장, 바비큐장", votes: 3 }
+      ],
+      todos: [
+        { id: 1, text: "아이들 상비약 및 해열제", done: false },
+        { id: 2, text: "물놀이 튜브 & 수영복", done: true },
+        { id: 3, text: "카메라 & 충전 케이블", done: false }
+      ],
+      memos: [
+        { id: 1, author: "도나윤네", text: "첫날 저녁은 펜션 바비큐장에서 고기 구워먹어요!" },
+        { id: 2, author: "우진이네", text: "가는 길에 유명한 닭갈비 맛집 들렀다 가면 좋을 것 같아요." }
+      ]
+    };
 
-    let accommodations = JSON.parse(localStorage.getItem('family_trip_acc')) || defaultAccommodations;
-    let todos = JSON.parse(localStorage.getItem('family_trip_todos')) || defaultTodos;
-    let memos = JSON.parse(localStorage.getItem('family_trip_memos')) || defaultMemos;
+    // Firebase 초기화 및 실시간 데이터 리스너 연결
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      docRef = db.collection("trips").doc("family_trip_data");
+      isFirebaseReady = true;
 
-    function saveAndRender() {
-      localStorage.setItem('family_trip_acc', JSON.stringify(accommodations));
-      localStorage.setItem('family_trip_todos', JSON.stringify(todos));
-      localStorage.setItem('family_trip_memos', JSON.stringify(memos));
+      // 실시간 변경 감지 (어느 기기에서든 수정하면 모든 화면이 즉시 업데이트)
+      docRef.onSnapshot((doc) => {
+        if (doc.exists) {
+          appData = doc.data();
+          renderAll();
+        } else {
+          docRef.set(appData);
+        }
+      }, (err) => {
+        console.error("Firebase listen error:", err);
+      });
+    } catch (e) {
+      console.warn("Firebase Init fallback", e);
+      renderAll();
+    }
+
+    function syncData() {
+      if (isFirebaseReady && docRef) {
+        docRef.set(appData).catch(err => console.error("Firebase update failed: ", err));
+      } else {
+        renderAll();
+      }
+    }
+
+    function renderAll() {
       renderAccommodations();
       renderTodos();
       renderMemos();
     }
 
-    // 숙소 렌더링 (모든 항목 한 줄 고정)
+    // 숙소 렌더링
     function renderAccommodations() {
       const tbody = document.getElementById('accommodationTableBody');
       tbody.innerHTML = '';
-      if (accommodations.length === 0) {
+      const list = appData.accommodations || [];
+      if (list.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:20px;">등록된 숙소가 없습니다. 상단에서 추가해보세요!</td></tr>`;
         return;
       }
-      accommodations.forEach(item => {
+      list.forEach(item => {
         const tr = document.createElement('tr');
         const linkDisplay = item.link 
           ? `<a href="${item.link}" target="_blank">${item.name} 🔗</a>` 
@@ -510,7 +554,8 @@
         return;
       }
 
-      accommodations.push({
+      if (!appData.accommodations) appData.accommodations = [];
+      appData.accommodations.push({
         id: Date.now(),
         region: region || "기타",
         name: name,
@@ -526,21 +571,21 @@
       document.getElementById('accPrice').value = '';
       document.getElementById('accMemo').value = '';
 
-      saveAndRender();
+      syncData();
     }
 
     function deleteAccommodation(id) {
       if (confirm('이 숙소를 목록에서 삭제하시겠습니까?')) {
-        accommodations = accommodations.filter(item => item.id !== id);
-        saveAndRender();
+        appData.accommodations = appData.accommodations.filter(item => item.id !== id);
+        syncData();
       }
     }
 
     function changeVote(id, delta) {
-      const target = accommodations.find(item => item.id === id);
+      const target = appData.accommodations.find(item => item.id === id);
       if (target) {
         target.votes = Math.max(0, target.votes + delta);
-        saveAndRender();
+        syncData();
       }
     }
 
@@ -548,7 +593,8 @@
     function renderTodos() {
       const ul = document.getElementById('todoList');
       ul.innerHTML = '';
-      todos.forEach(todo => {
+      const list = appData.todos || [];
+      list.forEach(todo => {
         const li = document.createElement('li');
         li.className = `check-item ${todo.done ? 'done' : ''}`;
         li.innerHTML = `
@@ -566,29 +612,31 @@
       const input = document.getElementById('todoInput');
       const val = input.value.trim();
       if (!val) return;
-      todos.push({ id: Date.now(), text: val, done: false });
+      if (!appData.todos) appData.todos = [];
+      appData.todos.push({ id: Date.now(), text: val, done: false });
       input.value = '';
-      saveAndRender();
+      syncData();
     }
 
     function toggleTodo(id) {
-      const todo = todos.find(t => t.id === id);
+      const todo = appData.todos.find(t => t.id === id);
       if (todo) {
         todo.done = !todo.done;
-        saveAndRender();
+        syncData();
       }
     }
 
     function deleteTodo(id) {
-      todos = todos.filter(t => t.id !== id);
-      saveAndRender();
+      appData.todos = appData.todos.filter(t => t.id !== id);
+      syncData();
     }
 
     // 메모 렌더링
     function renderMemos() {
       const container = document.getElementById('memoContainer');
       container.innerHTML = '';
-      memos.forEach(m => {
+      const list = appData.memos || [];
+      list.forEach(m => {
         const div = document.createElement('div');
         div.style.cssText = 'background:var(--palette-sand-light); border:1px solid var(--border); padding:10px 14px; border-radius:10px; margin-bottom:8px; font-size:0.88rem; display:flex; justify-content:space-between; align-items:center;';
         div.innerHTML = `
@@ -603,29 +651,26 @@
       const author = document.getElementById('memoAuthor').value.trim();
       const content = document.getElementById('memoContent').value.trim();
       if (!content) return;
-      memos.push({ id: Date.now(), author: author || '가족', text: content });
+      if (!appData.memos) appData.memos = [];
+      appData.memos.push({ id: Date.now(), author: author || '가족', text: content });
       document.getElementById('memoContent').value = '';
-      saveAndRender();
+      syncData();
     }
 
     function deleteMemo(id) {
-      memos = memos.filter(m => m.id !== id);
-      saveAndRender();
+      appData.memos = appData.memos.filter(m => m.id !== id);
+      syncData();
     }
 
     function exportData() {
-      const data = { accommodations, todos, memos };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'family_trip_backup.json';
+      a.download = 'family_trip_cloud_backup.json';
       a.click();
       URL.revokeObjectURL(url);
     }
-
-    // 초기 실행
-    saveAndRender();
   </script>
 </body>
 </html>
