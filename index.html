@@ -1,21 +1,30 @@
-updated_html_content = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>도윤나윤이네 우진이네 여행</title>
+  <title>도나윤이네 우진이네 여행플래너</title>
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --primary-light: #eff6ff;
-      --bg: #f8fafc;
+      --palette-sand-light: #f7f4ee;
+      --palette-sand-gray: #b2b083;
+      --palette-sand-tan: #c5a987;
+      --palette-aqua: #16bcc2;
+      --palette-green: #2d8259;
+      --palette-green-dark: #216343;
+      --palette-blue: #669bd8;
+      
+      --primary: var(--palette-green);
+      --primary-hover: var(--palette-green-dark);
+      --primary-light: #edf7f2;
+      --accent: var(--palette-aqua);
+      --bg: #f5f2eb;
       --card: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --danger: #ef4444;
-      --radius: 14px;
+      --text: #1c2e26;
+      --text-muted: #6b7c74;
+      --border: #dfd9cc;
+      --danger: #e05252;
+      --radius: 16px;
     }
     * {
       box-sizing: border-box;
@@ -29,27 +38,54 @@ updated_html_content = """<!DOCTYPE html>
       line-height: 1.5;
       padding-bottom: 80px;
     }
+
+    /* 해변 일러스트 헤더 */
     header {
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      position: relative;
+      background: linear-gradient(180deg, #669bd8 0%, #a2c6ee 45%, #e1edd8 75%, #c5a987 100%);
       color: white;
-      padding: 36px 20px;
+      padding: 45px 20px 75px;
       text-align: center;
-      border-radius: 0 0 24px 24px;
-      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.15);
+      border-radius: 0 0 28px 28px;
+      box-shadow: 0 6px 20px rgba(45, 130, 89, 0.15);
+      overflow: hidden;
+    }
+    .header-content {
+      position: relative;
+      z-index: 3;
+      text-shadow: 0 2px 8px rgba(0, 30, 20, 0.35);
     }
     header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
       margin-bottom: 6px;
+      color: #ffffff;
     }
     header p {
-      font-size: 0.9rem;
-      opacity: 0.9;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #f8fafc;
+      opacity: 0.95;
     }
+
+    /* 해변 SVG 일러스트 레이어 */
+    .beach-art {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
     .container {
       max-width: 820px;
-      margin: 0 auto;
-      padding: 24px 16px;
+      margin: -30px auto 0;
+      padding: 0 16px;
+      position: relative;
+      z-index: 4;
     }
     .section-card {
       background: var(--card);
@@ -57,7 +93,7 @@ updated_html_content = """<!DOCTYPE html>
       padding: 22px;
       margin-bottom: 24px;
       border: 1px solid var(--border);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 4px 14px rgba(45, 130, 89, 0.06);
     }
     .section-title {
       font-size: 1.15rem;
@@ -66,15 +102,16 @@ updated_html_content = """<!DOCTYPE html>
       display: flex;
       justify-content: space-between;
       align-items: center;
+      color: var(--palette-green);
     }
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 10px;
       margin-bottom: 16px;
-      background: var(--bg);
+      background: var(--palette-sand-light);
       padding: 14px;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid var(--border);
     }
     input, select {
@@ -85,18 +122,20 @@ updated_html_content = """<!DOCTYPE html>
       font-size: 0.88rem;
       outline: none;
       background: white;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      color: var(--text);
     }
     input:focus {
-      border-color: var(--primary);
+      border-color: var(--palette-aqua);
+      box-shadow: 0 0 0 3px rgba(22, 188, 194, 0.15);
     }
     .btn {
-      background: var(--primary);
+      background: var(--palette-green);
       color: white;
       border: none;
       padding: 9px 16px;
       border-radius: 8px;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.88rem;
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
@@ -105,21 +144,28 @@ updated_html_content = """<!DOCTYPE html>
       transform: scale(0.98);
     }
     .btn:hover {
-      background: var(--primary-hover);
+      background: var(--palette-green-dark);
+    }
+    .btn-accent {
+      background: var(--palette-aqua);
+    }
+    .btn-accent:hover {
+      background: #0ea1a7;
     }
     .btn-sm {
       padding: 4px 8px;
       font-size: 0.78rem;
     }
     .btn-danger {
-      background: #fee2e2;
+      background: #fde8e8;
       color: var(--danger);
+      border: 1px solid #fbd5d5;
     }
     .btn-danger:hover {
-      background: #fecaca;
+      background: #fbd5d5;
     }
     
-    /* 숙소 목록 테이블 */
+    /* 테이블 */
     .table-responsive {
       overflow-x: auto;
       margin-top: 10px;
@@ -136,15 +182,15 @@ updated_html_content = """<!DOCTYPE html>
       vertical-align: middle;
     }
     th {
-      background-color: var(--primary-light);
-      color: var(--text);
-      font-weight: 600;
+      background-color: var(--palette-sand-light);
+      color: var(--palette-green);
+      font-weight: 700;
       white-space: nowrap;
     }
     td a {
-      color: var(--primary);
+      color: #0d8b90;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
       display: inline-flex;
       align-items: center;
       gap: 4px;
@@ -153,24 +199,24 @@ updated_html_content = """<!DOCTYPE html>
       text-decoration: underline;
     }
     .price-tag {
-      font-weight: 700;
-      color: #047857;
+      font-weight: 800;
+      color: var(--palette-green);
       white-space: nowrap;
     }
     
-    /* 투표 컨트롤러 (+ 👍 -) */
+    /* 투표 컨트롤러 */
     .vote-control {
       display: inline-flex;
       align-items: center;
-      background: #f1f5f9;
+      background: #f5f2eb;
       border-radius: 20px;
       padding: 2px 6px;
       gap: 4px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--border);
     }
     .vote-btn {
       background: white;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border);
       width: 24px;
       height: 24px;
       border-radius: 50%;
@@ -180,7 +226,7 @@ updated_html_content = """<!DOCTYPE html>
       cursor: pointer;
       font-size: 0.9rem;
       font-weight: 700;
-      color: #334155;
+      color: var(--palette-green);
       user-select: none;
       transition: background 0.15s, transform 0.1s;
     }
@@ -188,7 +234,8 @@ updated_html_content = """<!DOCTYPE html>
       transform: scale(0.9);
     }
     .vote-btn:hover {
-      background: #e2e8f0;
+      background: var(--palette-sand-tan);
+      color: white;
     }
     .vote-count {
       display: inline-flex;
@@ -196,7 +243,7 @@ updated_html_content = """<!DOCTYPE html>
       gap: 3px;
       font-size: 0.85rem;
       font-weight: 700;
-      color: #1e293b;
+      color: var(--text);
       padding: 0 4px;
       min-width: 48px;
       justify-content: center;
@@ -225,35 +272,81 @@ updated_html_content = """<!DOCTYPE html>
     .check-item input[type="checkbox"] {
       width: 18px;
       height: 18px;
-      accent-color: var(--primary);
+      accent-color: var(--palette-aqua);
     }
 
     .share-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      padding: 12px 16px;
-      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 12px 18px;
+      border-radius: 12px;
       margin-bottom: 20px;
-      font-size: 0.85rem;
-      color: #1e40af;
+      font-size: 0.88rem;
+      color: var(--palette-green);
+      box-shadow: 0 2px 8px rgba(45, 130, 89, 0.05);
     }
   </style>
 </head>
 <body>
 
+  <!-- 해변 일러스트 헤더 -->
   <header>
-    <h1>🏡 즐거운 가족 여행 플래너</h1>
-    <p>우리 가족 & 함께 가는 가족을 위한 실시간 여행 공유 보드</p>
+    <svg class="beach-art" viewBox="0 0 800 240" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sunGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fff5cc" />
+          <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.8" />
+        </linearGradient>
+        <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#16bcc2" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#2d8259" stop-opacity="0.8" />
+        </linearGradient>
+      </defs>
+
+      <!-- 태양 및 구름 -->
+      <circle cx="680" cy="50" r="32" fill="url(#sunGrad)" opacity="0.85" />
+      <path d="M120 40 q20 -15 45 0 q25 -20 50 0 q20 15 0 25 h-95 z" fill="#ffffff" opacity="0.4" />
+      <path d="M520 65 q15 -10 35 0 q20 -15 40 0 q15 10 0 20 h-75 z" fill="#ffffff" opacity="0.35" />
+
+      <!-- 갈매기 -->
+      <path d="M260 45 q10 -8 20 0 q10 -8 20 0" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.6" />
+      <path d="M295 55 q7 -6 14 0 q7 -6 14 0" fill="none" stroke="#ffffff" stroke-width="1.8" opacity="0.5" />
+
+      <!-- 바다 파도 레이어 1 -->
+      <path d="M0 135 C150 120 280 145 420 130 C560 115 690 140 800 128 L800 240 L0 240 Z" fill="url(#seaGrad)" />
+
+      <!-- 바다 파도 레이어 2 (에메랄드/아쿠아) -->
+      <path d="M0 155 C120 140 240 165 390 150 C540 135 670 160 800 148 L800 240 L0 240 Z" fill="#16bcc2" opacity="0.75" />
+
+      <!-- 해변 모래사장 (따뜻한 샌드 탄) -->
+      <path d="M0 185 C180 165 340 195 520 175 C680 160 760 180 800 172 L800 240 L0 240 Z" fill="#c5a987" />
+      <path d="M0 205 C150 190 320 215 500 198 C660 185 750 205 800 195 L800 240 L0 240 Z" fill="#afad7e" opacity="0.6" />
+
+      <!-- 야자수 섬 실루엣 (좌측) -->
+      <path d="M-20 200 Q40 175 100 240 Z" fill="#b2b083" />
+      <!-- 야자수 줄기 -->
+      <path d="M35 195 Q48 160 62 135" fill="none" stroke="#216343" stroke-width="5" stroke-linecap="round" />
+      <!-- 야자수 잎 -->
+      <path d="M62 135 Q35 125 20 138" fill="none" stroke="#2d8259" stroke-width="3" stroke-linecap="round" />
+      <path d="M62 135 Q50 110 35 115" fill="none" stroke="#2d8259" stroke-width="3" stroke-linecap="round" />
+      <path d="M62 135 Q75 110 90 118" fill="none" stroke="#2d8259" stroke-width="3" stroke-linecap="round" />
+      <path d="M62 135 Q90 130 102 142" fill="none" stroke="#2d8259" stroke-width="3" stroke-linecap="round" />
+    </svg>
+
+    <div class="header-content">
+      <h1>🌴 도나윤이네 우진이네 여행플래너</h1>
+      <p>실시간 확인용 공유 보드 by leo</p>
+    </div>
   </header>
 
   <div class="container">
 
     <div class="share-bar">
-      <span>💡 브라우저에 자동 저장되며 항목을 추가·수정·삭제할 수 있습니다.</span>
-      <button class="btn btn-sm" onclick="exportData()">데이터 내보내기</button>
+      <span>💡 브라우저에 자동 저장되며 모든 항목을 자유롭게 추가·수정할 수 있습니다.</span>
+      <button class="btn btn-sm btn-accent" onclick="exportData()">데이터 내보내기</button>
     </div>
 
     <!-- 1. 숙소 후보 비교 및 투표 테이블 -->
@@ -332,8 +425,8 @@ updated_html_content = """<!DOCTYPE html>
     ];
 
     const defaultMemos = [
-      { id: 1, author: "가족1", text: "첫날 저녁은 펜션 바비큐장에서 고기 구워먹어요!" },
-      { id: 2, author: "가족2", text: "가는 길에 유명한 닭갈비 맛집 들렀다 가면 좋을 것 같아요." }
+      { id: 1, author: "도나윤네", text: "첫날 저녁은 펜션 바비큐장에서 고기 구워먹어요!" },
+      { id: 2, author: "우진이네", text: "가는 길에 유명한 닭갈비 맛집 들렀다 가면 좋을 것 같아요." }
     ];
 
     let accommodations = JSON.parse(localStorage.getItem('family_trip_acc')) || defaultAccommodations;
@@ -364,10 +457,10 @@ updated_html_content = """<!DOCTYPE html>
           : `<strong>${item.name}</strong>`;
         
         tr.innerHTML = `
-          <td><span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:6px; font-weight:600; font-size:0.8rem;">${item.region}</span></td>
+          <td><span style="background:#eaf5f0; color:#216343; padding:3px 9px; border-radius:6px; font-weight:700; font-size:0.82rem; border:1px solid #c9e6d8;">${item.region}</span></td>
           <td>${linkDisplay}</td>
           <td class="price-tag">${Number(item.price).toLocaleString()}원</td>
-          <td style="color:var(--text-muted); font-size:0.85rem;">${item.memo}</td>
+          <td style="color:var(--text-muted); font-size:0.86rem;">${item.memo}</td>
           <td>
             <div class="vote-control">
               <button class="vote-btn" onclick="changeVote(${item.id}, -1)" title="투표 감소">-</button>
@@ -421,11 +514,10 @@ updated_html_content = """<!DOCTYPE html>
       }
     }
 
-    // 투표 올림 / 내림 함수 (+ / -)
     function changeVote(id, delta) {
       const target = accommodations.find(item => item.id === id);
       if (target) {
-        target.votes = Math.max(0, target.votes + delta); // 0 미만으로 내려가지 않도록 처리
+        target.votes = Math.max(0, target.votes + delta);
         saveAndRender();
       }
     }
@@ -476,9 +568,9 @@ updated_html_content = """<!DOCTYPE html>
       container.innerHTML = '';
       memos.forEach(m => {
         const div = document.createElement('div');
-        div.style.cssText = 'background:var(--bg); border:1px solid var(--border); padding:10px 14px; border-radius:8px; margin-bottom:8px; font-size:0.88rem; display:flex; justify-content:space-between; align-items:center;';
+        div.style.cssText = 'background:var(--palette-sand-light); border:1px solid var(--border); padding:10px 14px; border-radius:10px; margin-bottom:8px; font-size:0.88rem; display:flex; justify-content:space-between; align-items:center;';
         div.innerHTML = `
-          <div><strong style="color:var(--primary); margin-right:6px;">[${m.author || '가족'}]</strong> ${m.text}</div>
+          <div><strong style="color:var(--palette-green); margin-right:6px;">[${m.author || '가족'}]</strong> ${m.text}</div>
           <button class="btn btn-sm btn-danger" onclick="deleteMemo(${m.id})">✕</button>
         `;
         container.appendChild(div);
@@ -515,9 +607,3 @@ updated_html_content = """<!DOCTYPE html>
   </script>
 </body>
 </html>
-"""
-
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(updated_html_content)
-
-print("Updated index.html created.")
