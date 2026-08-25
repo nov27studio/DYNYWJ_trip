@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>가족 여행 계획 & 숙소 후보 투표</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+      --radius: 12px;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+    header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 32px 20px;
+      text-align: center;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.15);
+    }
+    header h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    header p {
+      font-size: 0.88rem;
+      opacity: 0.9;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+    .section-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    input, select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      background: white;
+    }
+    input:focus {
+      border-color: var(--primary);
+    }
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 0.75rem;
+    }
+    .btn-danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+    .btn-danger:hover {
+      background: #fecaca;
+    }
+    
+    /* 숙소 비교 테이블 */
+    .table-responsive {
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    th {
+      background-color: var(--primary-light);
+      color: var(--text);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    td a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    td a:hover {
+      text-decoration: underline;
+    }
+    .price-tag {
+      font-weight: 700;
+      color: #047857;
+    }
+    .vote-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f1f5f9;
+      padding: 4px 8px;
+      border-radius: 20px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.8rem;
+    }
+    .vote-badge:hover {
+      background: #e2e8f0;
+    }
+
+    /* 체크리스트 */
+    .checklist {
+      list-style: none;
+    }
+    .check-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .check-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .check-item.done label {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🏡 함께 떠나는 가족 여행 공유 보드</h1>
+    <p>링크로 접속한 모든 가족이 실시간으로 편집하고 의견을 남길 수 있습니다.</p>
+  </header>
+
+  <div class="container">
+
+    <!-- 1. 숙소 후보 비교 및 투표 테이블 -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>🏨 숙소 & 펜션 후보 목록</span>
+      </div>
+
+      <!-- 숙소 추가 입력폼 -->
+      <div class="form-grid">
+        <input type="text" id="accRegion" placeholder="지역 (예: 가평, 속초)" />
+        <input type="text" id="accName" placeholder="숙소/펜션 이름" />
+        <input type="url" id="accLink" placeholder="예약 링크 (https://...)" />
+        <input type="number" id="accPrice" placeholder="예상 1박 가격(원)" />
+        <input type="text" id="accMemo" placeholder="특징 (예: 독채, 수영장)" />
+        <button class="btn" onclick="addAccommodation()">+ 숙소 추가</button>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>지역</th>
+              <th>숙소명</th>
+              <th>예상 1박 요금</th>
+              <th>특징 및 메모</th>
+              <th>투표</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="accommodationTableBody">
+            <!-- 기본 예시 항목 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2. 여행 준비물 체크리스트 (수정 가능) -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>🎒 공동 준비물 & 체크리스트</span>
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <input type="text" id="todoInput" placeholder="추가할 준비물 또는 할 일 입력" />
+        <button class="btn" onclick="addTodo()">추가</button>
+      </div>
+      <ul class="checklist" id="todoList"></ul>
+    </div>
+
+    <!-- 3. 자유 메모 및 의견 공유 -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>💬 자유 메모 & 식당 후보</span>
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <input type="text" id="memoAuthor" placeholder="작성자" style="max-width:100px;" />
+        <input type="text" id="memoContent" placeholder="가고 싶은 맛집이나 전달사항을 적어주세요" />
+        <button class="btn" onclick="addMemo()">등록</button>
+      </div>
+      <div id="memoContainer"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // 기본 데이터 세팅
+    let accommodations = JSON.parse(localStorage.getItem('trip_acc')) || [
+      { id: 1, region: "강릉", name: "세인트존스 호텔", link: "https://map.naver.com", price: 180000, memo: "오션뷰, 인피니티풀", votes: 2 },
+      { id: 2, region: "가평", name: "어반힐스 키즈 풀빌라", link: "https://map.naver.com", price: 320000, memo: "아이 놀이방, 바비큐장", votes: 3 }
+    ];
+
+    let todos = JSON.parse(localStorage.getItem('trip_todos')) || [
+      { id: 1, text: "아이들 상비약 챙기기", done: false },
+      { id: 2, text: "튜브 및 물놀이 용품", done: true }
+    ];
+
+    let memos = JSON.parse(localStorage.getItem('trip_memos')) || [
+      { id: 1, author: "가족A", text: "첫째 날 저녁은 숙소에서 바비큐 구워먹어요!" }
+    ];
+
+    function saveAndRender() {
+      localStorage.setItem('trip_acc', JSON.stringify(accommodations));
+      localStorage.setItem('trip_todos', JSON.stringify(todos));
+      localStorage.setItem('trip_memos', JSON.stringify(memos));
+      renderAccommodations();
+      renderTodos();
+      renderMemos();
+    }
+
+    // 숙소 렌더링
+    function renderAccommodations() {
+      const tbody = document.getElementById('accommodationTableBody');
+      tbody.innerHTML = '';
+      accommodations.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        const linkDisplay = item.link ? `<a href="${item.link}" target="_blank">${item.name} 🔗</a>` : item.name;
+        tr.innerHTML = `
+          <td><strong>${item.region}</strong></td>
+          <td>${linkDisplay}</td>
+          <td class="price-tag">${Number(item.price).toLocaleString()}원</td>
+          <td style="color:var(--text-muted); font-size:0.82rem;">${item.memo}</td>
+          <td>
+            <span class="vote-badge" onclick="voteAccommodation(${item.id})">👍 ${item.votes}</span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-danger" onclick="deleteAccommodation(${item.id})">삭제</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addAccommodation() {
+      const region = document.getElementById('accRegion').value.trim();
+      const name = document.getElementById('accName').value.trim();
+      const link = document.getElementById('accLink').value.trim();
+      const price = document.getElementById('accPrice').value.trim();
+      const memo = document.getElementById('accMemo').value.trim();
+
+      if (!name || !price) {
+        alert('숙소 이름과 예상 가격을 입력해주세요.');
+        return;
+      }
+
+      accommodations.push({
+        id: Date.now(),
+        region: region || "미정",
+        name: name,
+        link: link.startsWith('http') ? link : (link ? 'https://' + link : ''),
+        price: parseInt(price, 10),
+        memo: memo || "-",
+        votes: 0
+      });
+
+      document.getElementById('accRegion').value = '';
+      document.getElementById('accName').value = '';
+      document.getElementById('accLink').value = '';
+      document.getElementById('accPrice').value = '';
+      document.getElementById('accMemo').value = '';
+
+      saveAndRender();
+    }
+
+    function deleteAccommodation(id) {
+      accommodations = accommodations.filter(item => item.id !== id);
+      saveAndRender();
+    }
+
+    function voteAccommodation(id) {
+      const target = accommodations.find(item => item.id === id);
+      if (target) {
+        target.votes += 1;
+        saveAndRender();
+      }
+    }
+
+    // 할 일 렌더링
+    function renderTodos() {
+      const ul = document.getElementById('todoList');
+      ul.innerHTML = '';
+      todos.forEach(todo => {
+        const li = document.createElement('li');
+        li.className = `check-item ${todo.done ? 'done' : ''}`;
+        li.innerHTML = `
+          <div class="check-left">
+            <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${todo.id})">
+            <label>${todo.text}</label>
+          </div>
+          <button class="btn btn-sm btn-danger" onclick="deleteTodo(${todo.id})">✕</button>
+        `;
+        ul.appendChild(li);
+      });
+    }
+
+    function addTodo() {
+      const input = document.getElementById('todoInput');
+      const val = input.value.trim();
+      if (!val) return;
+      todos.push({ id: Date.now(), text: val, done: false });
+      input.value = '';
+      saveAndRender();
+    }
+
+    function toggleTodo(id) {
+      const todo = todos.find(t => t.id === id);
+      if (todo) {
+        todo.done = !todo.done;
+        saveAndRender();
+      }
+    }
+
+    function deleteTodo(id) {
+      todos = todos.filter(t => t.id !== id);
+      saveAndRender();
+    }
+
+    // 메모 렌더링
+    function renderMemos() {
+      const container = document.getElementById('memoContainer');
+      container.innerHTML = '';
+      memos.forEach(m => {
+        const div = document.createElement('div');
+        div.style.cssText = 'background:var(--bg); border:1px solid var(--border); padding:8px 12px; border-radius:6px; margin-bottom:6px; font-size:0.85rem; display:flex; justify-content:space-between; align-items:center;';
+        div.innerHTML = `
+          <div><strong>[${m.author || '익명'}]</strong> ${m.text}</div>
+          <button class="btn btn-sm btn-danger" onclick="deleteMemo(${m.id})">✕</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addMemo() {
+      const author = document.getElementById('memoAuthor').value.trim();
+      const content = document.getElementById('memoContent').value.trim();
+      if (!content) return;
+      memos.push({ id: Date.now(), author: author || '익명', text: content });
+      document.getElementById('memoContent').value = '';
+      saveAndRender();
+    }
+
+    function deleteMemo(id) {
+      memos = memos.filter(m => m.id !== id);
+      saveAndRender();
+    }
+
+    // 초기 실행
+    saveAndRender();
+  </script>
+</body>
+</html>
