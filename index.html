@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>도나윤이네 우진이네 여행플래너</title>
   
-  <!-- Firebase SDK (v9 호환 모드) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -44,7 +43,6 @@
       padding-bottom: 80px;
     }
 
-    /* 해변 일러스트 헤더 */
     header {
       position: relative;
       background: linear-gradient(180deg, #669bd8 0%, #a2c6ee 45%, #e1edd8 75%, #c5a987 100%);
@@ -74,7 +72,6 @@
       opacity: 0.95;
     }
 
-    /* 해변 SVG 일러스트 레이어 */
     .beach-art {
       position: absolute;
       bottom: 0;
@@ -171,7 +168,6 @@
       background: #fbd5d5;
     }
     
-    /* 테이블 (1줄 고정 & 모바일 스크롤) */
     .table-responsive {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -226,7 +222,6 @@
       white-space: nowrap;
     }
     
-    /* 투표 컨트롤러 */
     .vote-control {
       display: inline-flex;
       align-items: center;
@@ -272,7 +267,6 @@
       justify-content: center;
     }
 
-    /* 체크리스트 */
     .checklist {
       list-style: none;
     }
@@ -324,14 +318,10 @@
       background: #10b981;
       display: inline-block;
     }
-    .dot-connecting {
-      background: #f59e0b;
-    }
   </style>
 </head>
 <body>
 
-  <!-- 해변 일러스트 헤더 -->
   <header>
     <svg class="beach-art" viewBox="0 0 800 240" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -373,20 +363,13 @@
       <div id="syncStatus" class="status-badge">
         <span class="dot"></span> <span>실시간 클라우드 동기화 중</span>
       </div>
-      <div style="display:flex; gap:6px;">
-        <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importJSON(event)" />
-        <button class="btn btn-sm" style="background:#b2b083; color:white;" onclick="document.getElementById('jsonFileInput').click()">📂 JSON 불러오기</button>
-        <button class="btn btn-sm btn-accent" onclick="exportData()">데이터 백업</button>
-      </div>
     </div>
 
-    <!-- 1. 숙소 후보 비교 및 투표 테이블 -->
-    <div class="section-card">
+        <div class="section-card">
       <div class="section-title">
         <span>🏨 숙소 & 펜션 후보 목록</span>
       </div>
 
-      <!-- 숙소 추가 입력폼 -->
       <div class="form-grid">
         <input type="text" id="accRegion" placeholder="지역 (예: 가평, 속초, 제주)" />
         <input type="text" id="accName" placeholder="숙소/펜션 이름" />
@@ -409,14 +392,12 @@
             </tr>
           </thead>
           <tbody id="accommodationTableBody">
-            <!-- 실시간 렌더링 -->
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- 2. 공동 체크리스트 -->
-    <div class="section-card">
+        <div class="section-card">
       <div class="section-title">
         <span>🎒 공동 체크리스트</span>
       </div>
@@ -427,8 +408,7 @@
       <ul class="checklist" id="todoList"></ul>
     </div>
 
-    <!-- 3. 자유 메모 및 맛집 공유 -->
-    <div class="section-card">
+        <div class="section-card">
       <div class="section-title">
         <span>💬 자유 메모 & 추천 맛집</span>
       </div>
@@ -443,7 +423,6 @@
   </div>
 
   <script>
-    // 전달해주신 Firebase 키값 설정
     const firebaseConfig = {
       apiKey: "AIzaSyDeAnZDZ-J0aaXF3rj_FGwyNeARGg67iog",
       authDomain: "test-6e393.firebaseapp.com",
@@ -458,95 +437,91 @@
     let db = null;
     let docRef = null;
 
-    // 백업해 두셨던 실제 데이터
     let appData = {
       "accommodations": [
-            {
-                  "id": 1787665566853,
-                  "region": "대부도",
-                  "name": "로이키즈풀빌라",
-                  "link": "https://map.naver.com/p/entry/place/1767304300?c=12.58,0,0,0,dh&placePath=%2Fhome%3FbookmarkId%3D4330615211%26from%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202608252244%26locale%3Dko%26svcName%3Dmap_pcv5%26businessCategory%3Dpension",
-                  "price": 300000,
-                  "memo": "독채키즈/9월중순풀마감",
-                  "votes": 1
-            },
-            {
-                  "id": 1787665679205,
-                  "region": "대부도",
-                  "name": "빵빵키즈풀빌라",
-                  "link": "https://map.naver.com/p/entry/place/1752452339?c=12.58,0,0,0,dh&placePath=%2Froom%3FbookmarkId%3D4756046778%26from%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202608252246%26locale%3Dko%26svcName%3Dmap_pcv5%26businessCategory%3Dpension%26entry%3Dbmp%26level%3Dtop%26guest%3D7%26checkin%3D20260928%26checkout%3D20260930",
-                  "price": 350000,
-                  "memo": "독채키즈/바다도보가능",
-                  "votes": 0
-            },
-            {
-                  "id": 1787665851414,
-                  "region": "강릉",
-                  "name": "하하스테이",
-                  "link": "https://map.naver.com/p/entry/place/1810378442?c=10.98,0,0,0,dh&placePath=%2Froom%3FbookmarkId%3D4756164047%26from%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202608252248%26locale%3Dko%26svcName%3Dmap_pcv5%26businessCategory%3Dpension%26level%3Dtop%26guest%3D7%26checkin%3D20260928%26checkout%3D20260930",
-                  "price": 380000,
-                  "memo": "실내풀/하평해변근처",
-                  "votes": 0
-            },
-            {
-                  "id": 1787666031166,
-                  "region": "파주",
-                  "name": "스테이세모정원",
-                  "link": "https://map.naver.com/p/entry/place/1206684865?lng=126.7431938&lat=37.7574366&placePath=%2Froom%3Fentry%3Dplt%26from%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202608252252%26locale%3Dko%26svcName%3Dmap_pcv5%26businessCategory%3Dpension&entry=plt&searchType=place&c=15.00,0,0,0,dh",
-                  "price": 440000,
-                  "memo": "주변 파주 체험장많음",
-                  "votes": 0
-            },
-            {
-                  "id": 1787666754201,
-                  "region": "삼척",
-                  "name": "솔비치리조트",
-                  "link": "https://www.sonohotelsresorts.com/solbeach_sc",
-                  "price": 230000,
-                  "memo": "취사가능/스위트룸기준",
-                  "votes": 1
-            }
+        {
+          "id": 1787665566853,
+          "region": "대부도",
+          "name": "로이키즈풀빌라",
+          "link": "https://map.naver.com/p/entry/place/1767304300?c=12.58,0,0,0,dh&placePath=%2Fhome%3FbookmarkId%3D4330615211%26from%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202608252244%26locale%3Dko%26svcName%3Dmap_pcv5%26businessCategory%3Dpension",
+          "price": 300000,
+          "memo": "독채키즈/9월중순풀마감",
+          "votes": 1
+        },
+        {
+          "id": 1787665679205,
+          "region": "대부도",
+          "name": "빵빵키즈풀빌라",
+          "link": "https://map.naver.com/p/entry/place/1752452339?c=12.58,0,0,0,dh&placePath=%2Froom%3FbookmarkId%3D4756046778%26from%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202608252246%26locale%3Dko%26svcName%3Dmap_pcv5%26businessCategory%3Dpension%26entry%3Dbmp%26level%3Dtop%26guest%3D7%26checkin%3D20260928%26checkout%3D20260930",
+          "price": 350000,
+          "memo": "독채키즈/바다도보가능",
+          "votes": 0
+        },
+        {
+          "id": 1787665851414,
+          "region": "강릉",
+          "name": "하하스테이",
+          "link": "https://map.naver.com/p/entry/place/1810378442?c=10.98,0,0,0,dh&placePath=%2Froom%3FbookmarkId%3D4756164047%26from%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202608252248%26locale%3Dko%26svcName%3Dmap_pcv5%26businessCategory%3Dpension%26level%3Dtop%26guest%3D7%26checkin%3D20260928%26checkout%3D20260930",
+          "price": 380000,
+          "memo": "실내풀/하평해변근처",
+          "votes": 0
+        },
+        {
+          "id": 1787666031166,
+          "region": "파주",
+          "name": "스테이세모정원",
+          "link": "https://map.naver.com/p/entry/place/1206684865?lng=126.7431938&lat=37.7574366&placePath=%2Froom%3Fentry%3Dplt%26from%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202608252252%26locale%3Dko%26svcName%3Dmap_pcv5%26businessCategory%3Dpension&entry=plt&searchType=place&c=15.00,0,0,0,dh",
+          "price": 440000,
+          "memo": "주변 파주 체험장많음",
+          "votes": 0
+        },
+        {
+          "id": 1787666754201,
+          "region": "삼척",
+          "name": "솔비치리조트",
+          "link": "https://www.sonohotelsresorts.com/solbeach_sc",
+          "price": 230000,
+          "memo": "취사가능/스위트룸기준",
+          "votes": 1
+        }
       ],
       "todos": [
-            {
-                  "id": 2,
-                  "text": "물놀이 튜브 & 수영복",
-                  "done": false
-            },
-            {
-                  "id": 3,
-                  "text": "카메라 & 충전 케이블",
-                  "done": false
-            }
+        {
+          "id": 2,
+          "text": "물놀이 튜브 & 수영복",
+          "done": false
+        },
+        {
+          "id": 3,
+          "text": "카메라 & 충전 케이블",
+          "done": false
+        }
       ],
       "memos": [
-            {
-                  "id": 1,
-                  "author": "가족1",
-                  "text": "첫날 저녁은 펜션 바비큐장에서 고기 구워먹어요!"
-            },
-            {
-                  "id": 2,
-                  "author": "가족2",
-                  "text": "가는 길에 유명한 닭갈비 맛집 들렀다 가면 좋을 것 같아요."
-            }
+        {
+          "id": 1,
+          "author": "가족1",
+          "text": "첫날 저녁은 펜션 바비큐장에서 고기 구워먹어요!"
+        },
+        {
+          "id": 2,
+          "author": "가족2",
+          "text": "가는 길에 유명한 닭갈비 맛집 들렀다 가면 좋을 것 같아요."
+        }
       ]
-};
+    };
 
-    // Firebase 초기화 및 실시간 데이터 리스너 연결
     try {
       firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
       docRef = db.collection("trips").doc("family_trip_data");
       isFirebaseReady = true;
 
-      // 실시간 변경 감지 (어느 기기에서든 수정하면 모든 화면이 즉시 업데이트)
       docRef.onSnapshot((doc) => {
         if (doc.exists) {
           appData = doc.data();
           renderAll();
         } else {
-          // 최초 연결 시 백업 데이터를 클라우드에 자동 등록
           docRef.set(appData);
         }
       }, (err) => {
@@ -571,7 +546,6 @@
       renderMemos();
     }
 
-    // 숙소 렌더링
     function renderAccommodations() {
       const tbody = document.getElementById('accommodationTableBody');
       tbody.innerHTML = '';
@@ -653,7 +627,6 @@
       }
     }
 
-    // 공동 체크리스트 렌더링
     function renderTodos() {
       const ul = document.getElementById('todoList');
       ul.innerHTML = '';
@@ -695,7 +668,6 @@
       syncData();
     }
 
-    // 메모 렌더링
     function renderMemos() {
       const container = document.getElementById('memoContainer');
       container.innerHTML = '';
@@ -724,45 +696,6 @@
     function deleteMemo(id) {
       appData.memos = appData.memos.filter(m => m.id !== id);
       syncData();
-    }
-
-    function importJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          if (parsed && (parsed.accommodations || parsed.todos || parsed.memos)) {
-            if (confirm('선택한 JSON 파일의 데이터를 Firebase 클라우드에 덮어씌울까요?\n(모든 기기 화면이 즉시 업데이트됩니다)')) {
-              appData = {
-                accommodations: parsed.accommodations || [],
-                todos: parsed.todos || [],
-                memos: parsed.memos || []
-              };
-              syncData();
-              alert('데이터가 성공적으로 클라우드에 반영되었습니다!');
-            }
-          } else {
-            alert('올바른 여행 플래너 백업 JSON 형식이 아닙니다.');
-          }
-        } catch (err) {
-          alert('JSON 파일을 읽는 중 오류가 발생했습니다: ' + err.message);
-        }
-      };
-      reader.readAsText(file);
-      event.target.value = '';
-    }
-
-    function exportData() {
-      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'family_trip_cloud_backup.json';
-      a.click();
-      URL.revokeObjectURL(url);
     }
   </script>
 </body>
